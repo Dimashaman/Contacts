@@ -15,47 +15,35 @@ class ContactCollection
     public function makeGreeting()
     {
         $greetings = "Hi ";
-        $numItems = count($this->contacts);
-        $i = 0;
-        foreach ($this->contacts as $contact) {
-            if (++$i === $numItems) {
-                $greetings = rtrim($greetings, ', ') . ' & ' . $contact->firstName;
-            } else {
-                $greetings = $greetings . $contact->firstName . ", ";
-            }
+        $greetingsArray = [];
+        while ($contact = \array_shift($this->contacts)) {
+            $greetingsArray[] = $contact->firstName;
         }
 
-        return $greetings;
+        $lastContact  = array_pop($greetingsArray);
+        $greetingsString = $greetings . \implode(", ", $greetingsArray) . " & " . $lastContact;
+
+        return $greetingsString;
     }
 
     public function makeAdressats()
     {
-        $adressats = "";
-        $numItems = count($this->contacts);
-        $i = 0;
-
-        usort($this->contacts, function ($a, $b) {
-            return strcmp($a->lastName, $b->lastName);
-        });
-
-        foreach ($this->contacts as $key => $contact) {
-            if (++$i === $numItems) {
-                if ($this->contacts[$key - 1]->lastName === $contact->lastName) {
-                    $adressats = $this->str_lreplace(', ', ' and ', $adressats);
-                    $adressats = $adressats . $contact->fullName;
-                } else {
-                    $adressats = rtrim($adressats, ', ') . ' and ' . $contact->fullName;
-                }
+        $adressatsArray = [];
+        while ($contact = \array_shift($this->contacts)) {
+            $contactName = '';
+            if ($contact->lastName === $this->contacts[0]->lastName) {
+                $contactName = $contact->firstName . " & " . $this->contacts[0]->fullName;
+                \array_shift($this->contacts);
             } else {
-                if ($this->contacts[$key + 1]->lastName === $contact->lastName) {
-                    $adressats = $adressats . $contact->firstName . ' & ';
-                } else {
-                    $adressats = $adressats . $contact->fullName . ", ";
-                }
+                $contactName = $contact->fullName;
             }
+            $adressatsArray[] = $contactName;
         }
 
-        return $adressats;
+        $lastContact  = array_pop($adressatsArray);
+        $addressatsString = \implode(", ", $adressatsArray) . " and " . $lastContact;
+        
+        return $addressatsString;
     }
 
     private function sortContacts()
